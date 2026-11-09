@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Navbar from './components/Navbar.jsx';
 import QuickStats from './components/QuickStats.jsx';
 import BookingManager from './components/BookingManager.jsx';
@@ -21,11 +21,6 @@ import {
   saveSavedResults
 } from './utils/storage.js';
 
-function isStateEqual(a, b) {
-  if (!a || !b) return true;
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
 export default function App() {
   const [theme, setTheme] = useState(loadTheme);
   const [bookings, setBookings] = useState(loadBookings);
@@ -47,20 +42,24 @@ export default function App() {
     }
   ]);
 
-  // Snapshot of what is currently saved in MongoDB
+  // Snapshot of what is saved in MongoDB document (main_user)
   const [savedSnapshot, setSavedSnapshot] = useState({
     bookings: loadBookings(),
     config: loadConfig(),
     telegram: loadTelegram()
   });
 
-  // Check if current working state differs from MongoDB saved snapshot
-  const hasUnsavedChanges = !isStateEqual(
-    { bookings, config, telegram },
-    savedSnapshot
-  );
+  // Accurate change detection between working state and MongoDB snapshot
+  const hasUnsavedChanges = useMemo(() => {
+    if (!savedSnapshot) return false;
+    return (
+      JSON.stringify(bookings) !== JSON.stringify(savedSnapshot.bookings) ||
+      JSON.stringify(config) !== JSON.stringify(savedSnapshot.config) ||
+      JSON.stringify(telegram) !== JSON.stringify(savedSnapshot.telegram)
+    );
+  }, [bookings, config, telegram, savedSnapshot]);
 
-  // Live refs for polling interval
+  // Synchronized refs for background timer callbacks
   const bookingsRef = useRef(bookings);
   bookingsRef.current = bookings;
 
@@ -73,10 +72,22 @@ export default function App() {
   const isSearchingRef = useRef(isSearching);
   isSearchingRef.current = isSearching;
 
+  const resultsRef = useRef(results);
+  resultsRef.current = results;
+
+  const lastScanTimeRef = useRef(lastScanTime);
+  lastScanTimeRef.current = lastScanTime;
+
   const lastSearchTimestampRef = useRef(lastSearchTimestamp);
   lastSearchTimestampRef.current = lastSearchTimestamp;
 
-  // Apply theme class to <html> element
+  // Concurrency guard ref to prevent overlapping searches
+  const isCheckingRef = useRef(false);
+
+  // Countdown timer tracker ref
+  const countdownRef = useRef(Number(config.checkInterval || 60));
+
+  // Theme application
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
@@ -102,7 +113,8 @@ export default function App() {
     setLogs([]);
   };
 
-  // Save current working state to MongoDB (single document: main_user)
+  // Save state to MongoDB (single document: main_user)
+  // Stable reference that reads current values from refs or passed overrides
   const saveStateToMongo = useCallback(async (overrides = {}) => {
     setIsSaving(true);
     try {
@@ -111,8 +123,8 @@ export default function App() {
         bookings: overrides.bookings !== undefined ? overrides.bookings : bookingsRef.current,
         config: overrides.config !== undefined ? overrides.config : configRef.current,
         telegram: overrides.telegram !== undefined ? overrides.telegram : telegramRef.current,
-        results,
-        lastScanTime,
+        results: overrides.results !== undefined ? overrides.results : resultsRef.current,
+        lastScanTime: overrides.lastScanTime !== undefined ? overrides.lastScanTime : lastScanTimeRef.current,
         lastSearchTimestamp: overrides.lastSearchTimestamp !== undefined ? overrides.lastSearchTimestamp : lastSearchTimestampRef.current
       };
 
@@ -134,7 +146,7 @@ export default function App() {
         saveIsSearching(targetState.isSearching);
         return true;
       } else {
-        const errData = await res.json();
+        const errData = await res.json().catch(() => ({}));
         addLog(`Failed to save to MongoDB: ${errData.error || 'Server error'}`, 'error');
         return false;
       }
@@ -144,16 +156,22 @@ export default function App() {
     } finally {
       setIsSaving(false);
     }
-  }, [results, lastScanTime, addLog]);
+  }, [addLog]);
 
-  // Main Lookup Runner
+  // Main Lookup Runner with concurrency lock & in-flight cancel guard
   const executeLookup = useCallback(async () => {
+    // Concurrency guard: reject if a check is already underway
+    if (isCheckingRef.current) {
+      return;
+    }
+
     const currentBookings = bookingsRef.current.filter((b) => b && b.active);
     if (currentBookings.length === 0) {
       addLog('No active booking cURLs enabled.', 'warn');
       return;
     }
 
+    isCheckingRef.current = true;
     setIsCheckingNow(true);
 
     try {
@@ -167,26 +185,35 @@ export default function App() {
         })
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({ error: 'Invalid server response' }));
 
       if (data.logs && Array.isArray(data.logs)) {
         setLogs((prev) => [...prev.slice(-150), ...data.logs]);
       }
 
       if (response.ok && data.success) {
-        setResults(data.results || []);
-        saveSavedResults(data.results || []);
+        const newResults = data.results || [];
         const now = new Date().toLocaleTimeString();
         const nowMs = Date.now();
+
+        setResults(newResults);
+        resultsRef.current = newResults;
+        saveSavedResults(newResults);
+
         setLastScanTime(now);
+        lastScanTimeRef.current = now;
+
         setLastSearchTimestamp(nowMs);
         lastSearchTimestampRef.current = nowMs;
 
-        // Update MongoDB with latest scan timestamp & results
+        // If the user stopped searching while the HTTP request was in flight,
+        // respect their choice and persist isSearching: false.
+        const stillSearching = isSearchingRef.current;
         saveStateToMongo({
+          isSearching: stillSearching,
           lastSearchTimestamp: nowMs,
           lastScanTime: now,
-          results: data.results || []
+          results: newResults
         });
       } else {
         addLog(`Lookup error: ${data.error || 'Server error'}`, 'error');
@@ -194,87 +221,124 @@ export default function App() {
     } catch (err) {
       addLog(`Network error: ${err.message}`, 'error');
     } finally {
+      isCheckingRef.current = false;
       setIsCheckingNow(false);
     }
   }, [addLog, saveStateToMongo]);
 
-  // Load state from MongoDB document (_id: "main_user") on page load / refresh
+  // Hydrate initial state from MongoDB document ONCE on mount
   useEffect(() => {
-    async function loadMongoState() {
+    let isMounted = true;
+
+    async function loadMongoStateOnMount() {
       try {
         const res = await fetch('/api/state');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.hasServerState && data.state) {
-            const s = data.state;
-            if (s.bookings) {
-              setBookings(s.bookings);
-              saveBookings(s.bookings);
-            }
-            if (s.config) {
-              setConfig(s.config);
-              saveConfig(s.config);
-            }
-            if (s.telegram) {
-              setTelegram(s.telegram);
-              saveTelegram(s.telegram);
-            }
-            if (s.results) {
-              setResults(s.results);
-              saveSavedResults(s.results);
-            }
-            if (s.lastScanTime) {
-              setLastScanTime(s.lastScanTime);
-            }
-            if (s.lastSearchTimestamp) {
-              setLastSearchTimestamp(s.lastSearchTimestamp);
-              lastSearchTimestampRef.current = s.lastSearchTimestamp;
-            }
+        if (!res.ok) return;
 
-            // STALE STATE DETECTION:
-            // If state says searching is true, but last searched timestamp is more than
-            // (checkInterval + 60s) ago, the browser was closed. Set isSearching = false.
-            const intervalSec = Number(s.config?.checkInterval || 60);
-            const lastTime = Number(s.lastSearchTimestamp || 0);
-            const elapsed = Date.now() - lastTime;
-            const isStale = s.isSearching && (lastTime === 0 || elapsed > (intervalSec + 60) * 1000);
+        const data = await res.json();
+        if (!isMounted || !data.hasServerState || !data.state) return;
 
-            if (isStale) {
-              setIsSearching(false);
-              isSearchingRef.current = false;
-              saveIsSearching(false);
-              addLog('Browser was previously closed: search state reset to Idle.', 'info');
-              // Update MongoDB with corrected state
-              saveStateToMongo({ isSearching: false });
-            } else if (s.isSearching) {
-              setIsSearching(true);
-              isSearchingRef.current = true;
-              saveIsSearching(true);
-              // Active search within interval window: resume countdown & check
-              executeLookup();
-            } else {
-              setIsSearching(false);
-              isSearchingRef.current = false;
-              saveIsSearching(false);
-            }
-
-            // Set saved snapshot from MongoDB
-            setSavedSnapshot({
-              bookings: s.bookings || bookingsRef.current,
-              config: s.config || configRef.current,
-              telegram: s.telegram || telegramRef.current
-            });
-          }
+        const s = data.state;
+        if (s.bookings) {
+          setBookings(s.bookings);
+          bookingsRef.current = s.bookings;
+          saveBookings(s.bookings);
         }
-      } catch (e) {
-        console.warn('Could not load state from MongoDB:', e);
+        if (s.config) {
+          setConfig(s.config);
+          configRef.current = s.config;
+          saveConfig(s.config);
+        }
+        if (s.telegram) {
+          setTelegram(s.telegram);
+          telegramRef.current = s.telegram;
+          saveTelegram(s.telegram);
+        }
+        if (s.results) {
+          setResults(s.results);
+          resultsRef.current = s.results;
+          saveSavedResults(s.results);
+        }
+        if (s.lastScanTime) {
+          setLastScanTime(s.lastScanTime);
+          lastScanTimeRef.current = s.lastScanTime;
+        }
+        if (s.lastSearchTimestamp) {
+          setLastSearchTimestamp(s.lastSearchTimestamp);
+          lastSearchTimestampRef.current = s.lastSearchTimestamp;
+        }
+
+        // Establish clean baseline snapshot for unsaved changes detection
+        setSavedSnapshot({
+          bookings: s.bookings || bookingsRef.current,
+          config: s.config || configRef.current,
+          telegram: s.telegram || telegramRef.current
+        });
+
+        // If searching is active (and was verified non-stale by /api/state), resume search
+        if (s.isSearching) {
+          setIsSearching(true);
+          isSearchingRef.current = true;
+          saveIsSearching(true);
+
+          const intervalSec = Number(s.config?.checkInterval || 60);
+          const lastTime = Number(s.lastSearchTimestamp || 0);
+          const elapsedSec = lastTime > 0 ? Math.floor((Date.now() - lastTime) / 1000) : 0;
+          const remainingSec = Math.max(1, intervalSec - elapsedSec);
+
+          countdownRef.current = remainingSec;
+          setCountdown(remainingSec);
+          addLog('Active search session restored from MongoDB.', 'info');
+        } else {
+          setIsSearching(false);
+          isSearchingRef.current = false;
+          saveIsSearching(false);
+        }
+      } catch (err) {
+        console.warn('Could not load MongoDB state on mount:', err);
       }
     }
 
-    loadMongoState();
-  }, [addLog, executeLookup, saveStateToMongo]);
+    loadMongoStateOnMount();
 
-  // Handler: Save button clicked
+    return () => {
+      isMounted = false;
+    };
+  }, [addLog]);
+
+  // Interval Countdown Effect: Runs ONLY when searching is active.
+  // Completely isolated from state-updater side-effects.
+  useEffect(() => {
+    if (!isSearching) {
+      return;
+    }
+
+    const intervalSec = Number(configRef.current?.checkInterval || 60);
+    countdownRef.current = intervalSec;
+    setCountdown(intervalSec);
+
+    const timerId = setInterval(() => {
+      countdownRef.current -= 1;
+
+      if (countdownRef.current <= 0) {
+        const nextInterval = Number(configRef.current?.checkInterval || 60);
+        countdownRef.current = nextInterval;
+        setCountdown(nextInterval);
+
+        if (isSearchingRef.current && !isCheckingRef.current) {
+          executeLookup();
+        }
+      } else {
+        setCountdown(countdownRef.current);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId);
+    };
+  }, [isSearching, executeLookup]);
+
+  // Save changes explicitly to MongoDB
   const handleSaveChanges = async () => {
     const success = await saveStateToMongo();
     if (success) {
@@ -282,11 +346,15 @@ export default function App() {
     }
   };
 
-  // Handler: Restart button clicked (Enabled ONLY when hasUnsavedChanges is true)
+  // Restart search (enabled ONLY when changes are detected)
   const handleRestartSearch = async () => {
     const nowMs = Date.now();
     setLastSearchTimestamp(nowMs);
     lastSearchTimestampRef.current = nowMs;
+
+    const intervalSec = Number(configRef.current?.checkInterval || 60);
+    countdownRef.current = intervalSec;
+    setCountdown(intervalSec);
 
     const success = await saveStateToMongo({
       isSearching: true,
@@ -297,57 +365,46 @@ export default function App() {
       setIsSearching(true);
       isSearchingRef.current = true;
       saveIsSearching(true);
-      setCountdown(configRef.current.checkInterval || 60);
       addLog('Changes saved to MongoDB & search restarted with new criteria.', 'success');
-      // Trigger immediate lookup with new criteria
       executeLookup();
     }
   };
 
-  // Handle Search Start / Stop Toggle
+  // Start / Stop Toggle
   const handleToggleSearch = async () => {
-    if (isSearching) {
+    if (isSearchingRef.current) {
+      // User clicked STOP: Immediately shut down
       setIsSearching(false);
       isSearchingRef.current = false;
       saveIsSearching(false);
-      await saveStateToMongo({ isSearching: false });
       addLog('Search stopped.', 'warn');
+      await saveStateToMongo({ isSearching: false });
     } else {
+      // User clicked START: Start search loop
       const nowMs = Date.now();
+      const intervalSec = Number(configRef.current?.checkInterval || 60);
+
       setIsSearching(true);
       isSearchingRef.current = true;
       saveIsSearching(true);
+
       setLastSearchTimestamp(nowMs);
       lastSearchTimestampRef.current = nowMs;
-      setCountdown(configRef.current.checkInterval || 60);
+
+      countdownRef.current = intervalSec;
+      setCountdown(intervalSec);
+
+      addLog(`Search started (every ${intervalSec}s).`, 'success');
       await saveStateToMongo({ isSearching: true, lastSearchTimestamp: nowMs });
-      addLog(`Search started (every ${configRef.current.checkInterval || 60}s).`, 'success');
       executeLookup();
     }
   };
 
-  // Manual Trigger Check Now
+  // Manual trigger "Check Now"
   const handleManualRun = () => {
     addLog('Manual check triggered.', 'info');
     executeLookup();
   };
-
-  // Interval Countdown Effect (Never resets unexpectedly)
-  useEffect(() => {
-    if (!isSearching) return;
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          executeLookup();
-          return configRef.current.checkInterval || 60;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isSearching, executeLookup]);
 
   const activeCurlsCount = bookings.filter((b) => b && b.active).length;
   const lastMatchesCount = results.length > 0 ? results.reduce((acc, r) => acc + (r.buses?.length || 0), 0) : null;

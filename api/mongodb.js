@@ -40,7 +40,7 @@ export async function getMainUserState() {
   const conn = await getMongoClient();
 
   if (!conn) {
-    return fallbackMemoryState;
+    return fallbackMemoryState ? JSON.parse(JSON.stringify(fallbackMemoryState)) : null;
   }
 
   const { db } = conn;
@@ -60,7 +60,7 @@ export async function getMainUserState() {
  * Update the single main user configuration document in MongoDB
  */
 export async function saveMainUserState(state) {
-  fallbackMemoryState = state;
+  fallbackMemoryState = JSON.parse(JSON.stringify(state));
 
   const conn = await getMongoClient();
   if (!conn) {
