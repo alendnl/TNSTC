@@ -52,12 +52,12 @@ export default function TelegramConfig({ telegram, onUpdateTelegram }) {
   };
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/80 p-4 sm:p-5 shadow-xs space-y-4">
+    <div className="rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/80 p-4 sm:p-5 shadow-xs space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
         <div>
-          <h2 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-            <Send className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+          <h2 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+            <Send className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
             <span>Telegram Notifications</span>
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -71,8 +71,8 @@ export default function TelegramConfig({ telegram, onUpdateTelegram }) {
             onChange={(e) => onUpdateTelegram({ ...telegram, enabled: e.target.checked })}
             className="sr-only peer"
           />
-          <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
-          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+          <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
             {telegram.enabled ? 'Enabled' : 'Muted'}
           </span>
         </label>
@@ -90,7 +90,7 @@ export default function TelegramConfig({ telegram, onUpdateTelegram }) {
               value={telegram.botToken || ''}
               placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
               onChange={(e) => onUpdateTelegram({ ...telegram, botToken: e.target.value })}
-              className="w-full pl-3 pr-9 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 transition-colors"
+              className="w-full pl-3 pr-9 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
             />
             <button
               type="button"
@@ -113,13 +113,13 @@ export default function TelegramConfig({ telegram, onUpdateTelegram }) {
               value={telegram.chatId || ''}
               placeholder="e.g. 6392154802"
               onChange={(e) => onUpdateTelegram({ ...telegram, chatId: e.target.value })}
-              className="flex-1 px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-sky-500 transition-colors"
+              className="flex-1 px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
             />
             <button
               type="button"
               onClick={handleTestNotification}
               disabled={testing || !telegram.botToken || !telegram.chatId}
-              className="px-3 py-2 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-zinc-950 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+              className="px-3 py-2 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 disabled:opacity-40 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
             >
               {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
               <span>Test Bot</span>
@@ -135,9 +135,9 @@ export default function TelegramConfig({ telegram, onUpdateTelegram }) {
             type="checkbox"
             checked={telegram.notifyOnlyWhenFound}
             onChange={(e) => onUpdateTelegram({ ...telegram, notifyOnlyWhenFound: e.target.checked })}
-            className="rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sky-500 focus:ring-sky-500/20"
+            className="rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-emerald-600 focus:ring-emerald-500/20"
           />
-          <span className="text-xs text-zinc-600 dark:text-zinc-300">
+          <span className="text-xs text-zinc-600 dark:text-zinc-400">
             Send notification only when matching seats are found (recommended)
           </span>
         </label>
@@ -148,8 +148,8 @@ export default function TelegramConfig({ telegram, onUpdateTelegram }) {
         <div
           className={`p-3 rounded-xl text-xs flex items-center gap-2.5 ${
             testResult.success
-              ? 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
-              : 'bg-rose-50 dark:bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300'
+              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+              : 'bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-300'
           }`}
         >
           {testResult.success ? (

@@ -10,7 +10,6 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
   const [parseError, setParseError] = useState(null);
   const [parsedPreview, setParsedPreview] = useState(null);
 
-  // Live validation on cURL input change
   const handleCurlChange = (value) => {
     setInputCurl(value);
     setParseError(null);
@@ -97,13 +96,13 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
   };
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/80 p-4 sm:p-5 shadow-xs">
+    <div className="rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/80 p-4 sm:p-5 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
             <span>List of Bookings (cURLs)</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
               {bookings.length}
             </span>
           </h2>
@@ -114,7 +113,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
         <button
           onClick={handleOpenAdd}
           type="button"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition-colors shadow-xs cursor-pointer shrink-0"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 transition-colors shadow-2xs cursor-pointer shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add cURL</span>
@@ -125,7 +124,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
       <div className="space-y-2.5">
         {bookings.length === 0 ? (
           <div className="text-center py-8 px-4 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
-            <Terminal className="w-8 h-8 text-zinc-400 dark:text-zinc-600 mx-auto mb-2" />
+            <Terminal className="w-8 h-8 text-zinc-300 dark:text-zinc-600 mx-auto mb-2" />
             <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">No bookings configured</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
               Click &quot;Add cURL&quot; above to paste a booking request from Chrome DevTools.
@@ -149,10 +148,10 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
             return (
               <div
                 key={booking.id}
-                className={`p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                className={`p-3 rounded-xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                   booking.active
-                    ? 'bg-zinc-50 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                    : 'bg-zinc-100/50 dark:bg-zinc-950/60 border-zinc-200/50 dark:border-zinc-900 opacity-60'
+                    ? 'bg-zinc-50/70 dark:bg-zinc-950/60 border-zinc-200/90 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700'
+                    : 'bg-zinc-100/40 dark:bg-zinc-950/30 border-zinc-200/40 dark:border-zinc-900 opacity-60'
                 }`}
               >
                 {/* Info & Badges */}
@@ -163,7 +162,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                       type="button"
                       title={booking.active ? 'Click to pause route' : 'Click to activate route'}
                       className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        booking.active ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'
+                        booking.active ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'
                       }`}
                     >
                       <span
@@ -172,11 +171,11 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                         }`}
                       />
                     </button>
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-200 truncate">{booking.name}</span>
+                    <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">{booking.name}</span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold shrink-0 ${
+                      className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-medium shrink-0 ${
                         booking.active
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
                           : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
                       }`}
                     >
@@ -187,14 +186,14 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                   {/* Route & Date Badges */}
                   <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
                     {metaRoute && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 text-zinc-700 dark:text-zinc-300 font-medium">
-                        <MapPin className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium">
+                        <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-500" />
                         <span className="truncate max-w-[220px] sm:max-w-none">{metaRoute}</span>
                       </span>
                     )}
                     {metaDate && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 text-zinc-700 dark:text-zinc-300 font-mono">
-                        <Calendar className="w-3 h-3 text-sky-500 dark:text-sky-400" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 font-mono">
+                        <Calendar className="w-3 h-3 text-sky-600 dark:text-sky-400" />
                         <span>{metaDate}</span>
                       </span>
                     )}
@@ -207,7 +206,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                     onClick={() => handleOpenEdit(booking)}
                     type="button"
                     title="Edit cURL"
-                    className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
@@ -215,7 +214,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                     onClick={() => handleDelete(booking.id)}
                     type="button"
                     title="Delete booking"
-                    className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -228,12 +227,12 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
 
       {/* Add / Edit Modal Drawer */}
       {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/70 dark:bg-zinc-950/80 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 dark:bg-zinc-950/80 backdrop-blur-sm animate-in fade-in">
           <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl p-5 sm:p-6 max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800 mb-4">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800 mb-4">
+              <h3 className="text-base font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
                 <span>{editingId ? 'Edit Booking cURL' : 'Add New Booking cURL'}</span>
               </h3>
               <button
@@ -256,7 +255,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                   placeholder="e.g. Trichy to Kilambakkam Friday Night"
                   value={inputName}
                   onChange={(e) => setInputName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
                 />
               </div>
 
@@ -267,7 +266,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                     cURL Command (bash)
                   </label>
                   <span className="text-[11px] text-zinc-400">
-                    Chrome DevTools &rarr; Network &rarr; Right click SearchService &rarr; Copy as cURL
+                    Network &rarr; Right click SearchService &rarr; Copy as cURL
                   </span>
                 </div>
                 <textarea
@@ -275,14 +274,14 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                   placeholder="Paste curl command here (curl --url 'https://www.tnstc.in/OTRSOnline/jqreq.do...' -H '...' ...)"
                   value={inputCurl}
                   onChange={(e) => handleCurlChange(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors leading-relaxed"
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors leading-relaxed"
                 />
               </div>
 
               {/* Live Parsing Preview */}
               {parsedPreview && (
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950/70 border border-emerald-500/30 text-xs space-y-1.5">
-                  <div className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950/70 border border-emerald-500/25 text-xs space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
                     <CheckCircle className="w-3.5 h-3.5" />
                     <span>cURL Validated Successfully</span>
                   </div>
@@ -297,7 +296,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
                     </div>
                     <div>
                       <span className="text-zinc-500">Cookies: </span>
-                      <span className={parsedPreview.hasCookie ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-amber-500 font-semibold'}>
+                      <span className={parsedPreview.hasCookie ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-amber-600 font-semibold'}>
                         {parsedPreview.hasCookie ? 'JSESSIONID Present' : 'Missing Cookie Header'}
                       </span>
                     </div>
@@ -319,7 +318,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800 mt-4">
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800 mt-4">
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
@@ -330,7 +329,7 @@ export default function BookingManager({ bookings, onUpdateBookings }) {
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition-colors shadow-xs cursor-pointer"
+                className="px-4 py-2 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-2xs cursor-pointer"
               >
                 {editingId ? 'Save Changes' : 'Add Booking'}
               </button>
