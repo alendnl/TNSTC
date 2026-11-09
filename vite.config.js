@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import searchHandler from './api/search.js';
 import telegramHandler from './api/telegram.js';
-import cronHandler from './api/cron.js';
+import stateHandler from './api/state.js';
 
 function vercelApiDevPlugin() {
   return {
@@ -57,11 +57,11 @@ function vercelApiDevPlugin() {
           if (req.url.startsWith('/api/search')) {
             return await searchHandler(vercelReq, vercelRes);
           }
+          if (req.url.startsWith('/api/state')) {
+            return await stateHandler(vercelReq, vercelRes);
+          }
           if (req.url.startsWith('/api/telegram')) {
             return await telegramHandler(vercelReq, vercelRes);
-          }
-          if (req.url.startsWith('/api/cron')) {
-            return await cronHandler(vercelReq, vercelRes);
           }
         } catch (err) {
           console.error('API Dev Middleware Error:', err);

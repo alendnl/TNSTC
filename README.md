@@ -8,6 +8,10 @@ Built with **React + Vite + Tailwind CSS** frontend and **Vercel Serverless Func
 
 ## Key Features
 
+- **Cross-Device State Synchronization (Laptop <-> Mobile)**:
+  - Centralized state persistence via `/api/state`.
+  - When you enable routes or start searching on your laptop, opening the site on your phone reflects the exact same active status and settings.
+  - Automatically synchronizes across local network in dev mode, and seamlessly pairs with free Vercel KV (Upstash Redis) in cloud production.
 - **Frontend Configuration Panel**:
   - **Dynamic Bus Types**: Toggle AC Sleeper, Ultra Deluxe, Non-AC Sleeper, Deluxe 3x2, etc., with one click or add custom types.
   - **Departure Time Range**: Custom time intervals (e.g. 18:00 to 23:59 or overnight ranges like 20:00 to 04:00).
@@ -57,9 +61,10 @@ npm run build
    ```
 2. Go to [vercel.com](https://vercel.com) and click **"Add New Project"**.
 3. Select this GitHub repository. Vercel automatically detects the Vite framework and builds `dist/` while exposing the `/api` directory as serverless endpoints.
-4. (Optional) In Vercel Project Settings &rarr; **Environment Variables**, you can add:
-   - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_CHAT_ID`
+4. In Vercel Project Settings &rarr; **Environment Variables**, add:
+   - `MONGODB_URI`: Your MongoDB connection string (e.g. `mongodb+srv://...`)
+   - `TELEGRAM_BOT_TOKEN` (optional if configured in UI)
+   - `TELEGRAM_CHAT_ID` (optional if configured in UI)
 5. Click **Deploy**! Your site is live at `https://<your-project>.vercel.app`.
 
 ---
