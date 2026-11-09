@@ -176,6 +176,9 @@ export default async function handler(req, res) {
       });
     }
 
+    const results = [];
+    let totalBusesFound = 0;
+
     for (let i = 0; i < targets.length; i++) {
       const item = targets[i];
       const itemTitle = item.name || `Route ${i + 1}`;

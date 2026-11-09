@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Sliders, Clock, Users, Bus, Plus, RotateCcw, Check } from 'lucide-react';
 import { DEFAULT_ALLOWED_BUS_TYPES, ALL_KNOWN_BUS_TYPES } from '../utils/filterBuses.js';
 
-export default function FilterSettings({ config, onUpdateConfig, isSearching }) {
+export default function FilterSettings({ config, onUpdateConfig }) {
   const [customTypeInput, setCustomTypeInput] = useState('');
 
   const toggleBusType = (type) => {
@@ -27,16 +27,16 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
 
   const setPresetBusTypes = (preset) => {
     if (preset === 'all') {
-      onUpdateConfig({ ...config, allowedBusTypes: [...DEFAULT_ALLOWED_BUS_TYPES] });
+      onUpdateConfig({ ...config, allowedBusTypes: [...ALL_KNOWN_BUS_TYPES] });
     } else if (preset === 'ac') {
       onUpdateConfig({
         ...config,
-        allowedBusTypes: DEFAULT_ALLOWED_BUS_TYPES.filter((t) => t.includes('AC'))
+        allowedBusTypes: ALL_KNOWN_BUS_TYPES.filter((t) => t.includes('AC'))
       });
     } else if (preset === 'sleeper') {
       onUpdateConfig({
         ...config,
-        allowedBusTypes: DEFAULT_ALLOWED_BUS_TYPES.filter((t) => t.includes('SLEEPER'))
+        allowedBusTypes: ALL_KNOWN_BUS_TYPES.filter((t) => t.includes('SLEEPER'))
       });
     } else if (preset === 'clear') {
       onUpdateConfig({ ...config, allowedBusTypes: [] });
@@ -48,16 +48,16 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
   };
 
   return (
-    <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 p-4 sm:p-5 shadow-sm space-y-5">
+    <div className="rounded-2xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/80 p-4 sm:p-5 shadow-xs space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+      <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
         <div>
-          <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-emerald-400" />
+          <h2 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
             <span>Search & Filter Criteria</span>
           </h2>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Real-time filter controls matching original script criteria. Changes take effect on the next scan.
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Configure bus types, time window, and seat rules.
           </p>
         </div>
         <button
@@ -72,7 +72,7 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
               checkInterval: 60
             });
           }}
-          className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 p-1 rounded hover:bg-zinc-800 transition-colors cursor-pointer"
+          className="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white flex items-center gap-1 p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           title="Reset to default filters"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -83,37 +83,37 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
       {/* 1. Bus Types Filter */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-            <Bus className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Allowed Bus Types ({config.allowedBusTypes?.length || 0} active)</span>
+          <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+            <Bus className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+            <span>Allowed Bus Types ({config.allowedBusTypes?.length || 0} selected)</span>
           </label>
           {/* Quick Presets */}
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={() => setPresetBusTypes('all')}
-              className="text-[11px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
             >
               All Types
             </button>
             <button
               type="button"
               onClick={() => setPresetBusTypes('ac')}
-              className="text-[11px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
             >
               AC Only
             </button>
             <button
               type="button"
               onClick={() => setPresetBusTypes('sleeper')}
-              className="text-[11px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
             >
               Sleepers
             </button>
             <button
               type="button"
               onClick={() => setPresetBusTypes('clear')}
-              className="text-[11px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400 transition-colors cursor-pointer"
             >
               Clear
             </button>
@@ -131,11 +131,11 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
                 onClick={() => toggleBusType(busType)}
                 className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-sm'
-                    : 'bg-zinc-950 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                    ? 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 shadow-2xs'
+                    : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
               >
-                {isSelected && <Check className="w-3 h-3 text-emerald-400 flex-shrink-0" />}
+                {isSelected && <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />}
                 <span>{busType}</span>
               </button>
             );
@@ -150,12 +150,12 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
             value={customTypeInput}
             onChange={(e) => setCustomTypeInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddCustomType()}
-            className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+            className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
           />
           <button
             type="button"
             onClick={handleAddCustomType}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -164,12 +164,12 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
       </div>
 
       {/* 2. Time Range & Minimum Seats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-zinc-800/80">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-zinc-200 dark:border-zinc-800/80">
         {/* Time Range */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-sky-400" />
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
               <span>Departure Time Range</span>
             </label>
             {/* Quick time presets */}
@@ -177,21 +177,21 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
               <button
                 type="button"
                 onClick={() => setTimePreset('18:00', '23:59')}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
               >
                 Evening
               </button>
               <button
                 type="button"
                 onClick={() => setTimePreset('20:00', '04:00')}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
               >
                 Night
               </button>
               <button
                 type="button"
                 onClick={() => setTimePreset('00:00', '23:59')}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
               >
                 All Day
               </button>
@@ -204,7 +204,7 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
                 type="time"
                 value={config.startTime}
                 onChange={(e) => onUpdateConfig({ ...config, startTime: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div>
@@ -213,21 +213,21 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
                 type="time"
                 value={config.endTime}
                 onChange={(e) => onUpdateConfig({ ...config, endTime: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-900 dark:text-white focus:outline-none focus:border-emerald-500"
               />
             </div>
           </div>
         </div>
 
         {/* Seat Requirements */}
-        <div>
-          <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5 mb-1.5">
-            <Users className="w-3.5 h-3.5 text-amber-400" />
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
             <span>Seat Availability Requirements</span>
           </label>
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-zinc-400">Minimum seats needed:</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-zinc-600 dark:text-zinc-400">Min seats needed:</span>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <button
@@ -237,7 +237,7 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
                     className={`w-7 h-7 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer ${
                       config.minSeats === num
                         ? 'bg-emerald-500 text-zinc-950'
-                        : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
+                        : 'bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
                     {num}
@@ -252,9 +252,9 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
                 type="checkbox"
                 checked={config.enforceUltraDeluxeMin}
                 onChange={(e) => onUpdateConfig({ ...config, enforceUltraDeluxeMin: e.target.checked })}
-                className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20"
+                className="rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20"
               />
-              <span className="text-[11px] text-zinc-300">
+              <span className="text-[11px] text-zinc-600 dark:text-zinc-300">
                 Enforce strict Ultra Deluxe filter (&gt; 2 seats required)
               </span>
             </label>
@@ -263,11 +263,11 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
       </div>
 
       {/* 3. Polling Interval Selector */}
-      <div className="pt-3 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2">
+      <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800/80 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-xs font-semibold text-zinc-300">Polling Interval:</span>
-          <span className="text-xs text-zinc-400">Scan TNSTC every</span>
+          <Clock className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+          <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Polling Interval:</span>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">Scan every</span>
         </div>
         <div className="flex items-center gap-1.5">
           {[
@@ -284,7 +284,7 @@ export default function FilterSettings({ config, onUpdateConfig, isSearching }) 
               className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer ${
                 config.checkInterval === item.value
                   ? 'bg-emerald-500 text-zinc-950 font-bold'
-                  : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
+                  : 'bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               {item.label}
