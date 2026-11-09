@@ -1,0 +1,20 @@
+curl --url 'https://www.tnstc.in/OTRSOnline/jqreq.do?hiddenAction=SearchService' \
+  -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
+  -H 'Accept-Language: en-US,en;q=0.9' \
+  -H 'Cache-Control: max-age=0' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -b 'JSESSIONID=D4F0B535C6C629B1431894969163AB20; _ga=GA1.1.465872678.1788969560; _ga_EED126G79N=GS2.1.s1793625134$o10$g1$t1793625186$j8$l0$h0' \
+  -H 'DNT: 1' \
+  -H 'Origin: https://www.tnstc.in' \
+  -H 'Referer: https://www.tnstc.in/OTRSOnline/jqreq.do?hiddenAction=SearchService' \
+  -H 'Sec-Fetch-Dest: document' \
+  -H 'Sec-Fetch-Mode: navigate' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'Sec-Fetch-User: ?1' \
+  -H 'Upgrade-Insecure-Requests: 1' \
+  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36' \
+  -H 'sec-ch-ua: "Not:A-Brand";v="8", "Chromium";v="156", "Google Chrome";v="156"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  --data-raw 'txtdeptDateOtrip=09%2F11%2F2026&txtdeptDateRtrip=&hiddenJourneyType=O&hiddenClassName=&radOnwardServiceID=&hiddenOnwardUFromplacename=&hiddenOnwardUToplacename=&hiddenUserType=G&hiddenUserMasterID=&hiddenOnwardTimeSlab=&hiddenOnwardServiceInfo=&hiddenAction=SearchService&totalSeatsTodisplay=1&radOnewayOrReturnTrip=O&totalAdultSeatsTodisplay=1&totalChildSeatsTodisplay=0&hiddenTotalMales=&hiddenTotalFemales=&txtAdultMales=1&txtAdultFemales=0&txtChildMales=0&txtChildFemales=0&hiddenSeniorCitizenAge=&hiddenPickupPointName=&hiddenDropOffPointName=&hiddenConcessionName=&hiddenIdProofName=&hiddenCpcdID=&hiddenConcessionLookupID=&hiddenPickUpTime=&hiddenOnwardJourneyDate=09%2F11%2F2026&hiddenCurrentDate=02%2F11%2F2026&hiddenDifferentlyAbledSeatQuota=&hiddenDifferentlyAbledSeatStatus=&hiddenDifferentlyAbledSeatStatusReturn=&txtPickUpDate=&hiddenStartPlaceID=74&hiddenEndPlaceID=1392&txtStartPlaceCode=TRI&txtEndPlaceCode=KCB&hiddenStartPlaceName=TRICHY&hiddenEndPlaceName=CHENNAI-KILAMBAKKAM-KCBT&matchStartPlace=TRICHY&matchEndPlace=CHENNAI-KILAMBAKKAM-KCBT&txtJourneyDate=09%2F11%2F2026&hiddenMaxNoOfPassengers=16&hiddenMaxValidReservDate=02%2F12%2F2026&selectOnwardTimeSlab=00%3A00-23%3A59&selectStartPlace=TRI&selectEndPlace=KCB&hiddenOnwardServiceID=&hiddenClassID=&hiddenClassID=&hiddenStartPoint=&hiddenSeatNumbersTodisplay=&seatNumbersTodisplay=&seatNumbersTodisplayN=&hiddenCount=&hiddenNewLadiesSeatList=&hiddenNewPassengers=&hiddenNewAges=&hiddenNewSeatNOs=&hiddenRNewSeatNOs=&hiddenNewGenders=&hiddenNewACType=&hiddenNewOnwardPickupPointDetails=&hiddenNewOnwardDropOffPointDetails=&hiddenReturnJourneyDate=DD%2FMM%2FYYYY&hiddenNewReturnPickupPointDetails=&hiddenNewReturnDropOffPointDetails=&checkSingleLady=N&selectPickupPoint=&selectDropOffPoint=&hiddenNewMobileNO=&hiddenNewEmailID=&txtIdProofReference=&selectIdProof=&languageType=E&hiddenOnwardSelectedNewSeatNOs=&hiddenOnwardSelectedNewSeatNOsConversion=&hiddenReturnSelectedNewSeatNOs=&selectConcession=&chkAddOn=&lchkAddOn=&mtcSelectedBar=&coiSelectedBar=&hiddenOnwardSeatCount=&txtPicupPointTime=&txtReturnPicupPointTime=&hiddenPackageTrip=NO&hiddenSourceArea=&hiddenSourcePincode=&hiddenDestinationArea=&hiddenDestinationPincode='
