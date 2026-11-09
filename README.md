@@ -1,87 +1,116 @@
-# TNSTC Bus Notifier
+# TNSTC Bus Tracker & Telegram Notifier
 
-Automated Telegram notifications for TNSTC buses with multi-filter search.
+Modern, lightweight web application for tracking Tamil Nadu State Transport Corporation (TNSTC) bus availability in real-time with multi-criteria filtering and instant Telegram alerts.
 
-## Quick Start
+Built with **React + Vite + Tailwind CSS** frontend and **Vercel Serverless Functions (`/api`)**. Zero heavy backend to maintain, zero Docker required.
 
-```bash
-pip install requests
-python extract_showlayout.py
-```
+---
 
-## Run with Docker
+## Key Features
 
-Docker and Docker Compose are required.
+- **Frontend Configuration Panel**:
+  - **Dynamic Bus Types**: Toggle AC Sleeper, Ultra Deluxe, Non-AC Sleeper, Deluxe 3x2, etc., with one click or add custom types.
+  - **Departure Time Range**: Custom time intervals (e.g. 18:00 to 23:59 or overnight ranges like 20:00 to 04:00).
+  - **Seat Availability**: Set minimum seats required and strict Ultra Deluxe rules (> 2 seats).
+  - **Interval Adjustment**: Choose from 30s, 60s, 2m, 5m, or 10m search intervals.
+- **cURL Booking Manager**:
+  - Add, edit, or remove booking requests on the fly by pasting raw `curl` commands directly from Chrome DevTools.
+  - Automatically parses departure place, destination, booking date, and cookies.
+  - Toggle specific routes on or off without deleting them.
+- **Start / Stop Controls**:
+  - Real-time countdown timer until next scan.
+  - Immediate manual "Check Now" button.
+- **Live Terminal Console**:
+  - Embedded real-time execution logs with status levels (`[INFO]`, `[SUCCESS]`, `[WARN]`, `[ERROR]`).
+  - Auto-scroll lock toggle, clear logs, and download log file.
+- **Telegram Notifications**:
+  - Built-in test bot notification button.
+  - Configurable to send alerts only when seats are detected.
+- **24/7 Cloud Background Running**:
+  - Solves the problem of keeping searches active even when your laptop/computer is powered off.
+  - Triggerable via Vercel Cron, GitHub Actions (workflow included), or free external web cron (e.g. [cron-job.org](https://cron-job.org)).
 
-1. Copy `.env.example` to `.env` and set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
-2. Start the notifier:
+---
 
-```bash
-docker compose up --build -d
-```
-
-View the logs:
-
-```bash
-docker compose logs -f tnstc
-```
-
-Stop it with:
-
-```bash
-docker compose down
-```
-
-Set `CHECK_INTERVAL` in `.env` to change the polling interval in seconds. The generated `bus_details.html` remains available in the project directory.
-
-## Configuration
-
-Set `LIST_OF_BOOKINGS` in `extract_showlayout.py` to the curl command files to run in order, for example `['new1.txt', 'new2.txt']`. Add more `new*.txt` files to the list as needed; rebuild the Docker image after adding files.
-Telegram messages use the `txtdeptDateOtrip` date from each file's `--data-raw` form data.
-
-Set these environment variables. For Docker, put them in `.env` as described below; for a direct local run, export them in the shell:
+## Local Development
 
 ```bash
-export TELEGRAM_BOT_TOKEN='your_token_here'
-export TELEGRAM_CHAT_ID='your_chat_id_here'
-export CHECK_INTERVAL=60
+# 1. Install dependencies
+npm install
+
+# 2. Start Vite dev server (runs on http://localhost:5188)
+npm run dev
+
+# 3. Build for production
+npm run build
 ```
 
-## Architecture
+---
 
-**Main Loop** calls 3 methods every 10 minutes:
+## Deploy to Vercel (1-Click & 100% Free)
 
-1. **fetch_bus_data()** - Executes curl command, saves HTML response
-2. **process_and_filter_data()** - Applies 5 filters:
-   - Filter 1: Pattern match (showLayout() extraction)
-   - Filter 2: Data structure validation (7+ parts)
-   - Filter 3: Bus type (9 premium types)
-   - Filter 4: Time range (20:00-23:50)
-   - Filter 5: Seat availability (>1 seat)
-3. **send_telegram_notification()** - Sends filtered results via Telegram API
+1. Push this repository to your GitHub account:
+   ```bash
+   git add .
+   git commit -m "Complete redesign: Vite + React + Vercel Serverless"
+   git push origin main
+   ```
+2. Go to [vercel.com](https://vercel.com) and click **"Add New Project"**.
+3. Select this GitHub repository. Vercel automatically detects the Vite framework and builds `dist/` while exposing the `/api` directory as serverless endpoints.
+4. (Optional) In Vercel Project Settings &rarr; **Environment Variables**, you can add:
+   - `TELEGRAM_BOT_TOKEN`
+   - `TELEGRAM_CHAT_ID`
+5. Click **Deploy**! Your site is live at `https://<your-project>.vercel.app`.
 
-## Filters
+---
 
-- **Bus Types**: AC, AC Sleeper, Ultra Deluxe, Volvo Multi Axle, etc.
-- **Time**: 20:00 to 23:50
-- **Seats**: More than 1 available
+## Running 24/7 When Your Computer Is Powered Off
 
-## Running in Background
+A browser tab running on your laptop stops when the laptop is closed or turned off. To keep automated searches running in the cloud 24/7:
 
-```bash
-nohup python extract_showlayout.py > output.log 2>&1 &
+### Option 1: Free Cron-Job.org (Recommended & Easiest)
+1. Sign up for free at [cron-job.org](https://cron-job.org).
+2. Create a new cron job scheduled for **every 5 or 10 minutes**.
+3. Set the target URL to:
+   ```
+   https://<your-app>.vercel.app/api/cron
+   ```
+4. Save! Your Vercel cloud function will execute every 10 minutes and ping your Telegram bot whenever seats open up, even if you are asleep and your computer is off!
+
+### Option 2: GitHub Actions (Built into this repository)
+1. Go to your GitHub repository &rarr; **Settings** &rarr; **Secrets and variables** &rarr; **Actions**.
+2. Add a secret named `VERCEL_APP_URL` with your Vercel deployment URL (e.g. `https://<your-app>.vercel.app`).
+3. The included workflow at `.github/workflows/bus_tracker.yml` will automatically ping your Vercel search endpoint every 10 minutes around the clock.
+
+---
+
+## Project Structure
+
 ```
-
-Stop with: `pkill -f extract_showlayout.py`
-
-## Deployment Options (Free)
-
-**Replit** (Recommended): Upload code → Run → Enable "Always On"  
-**PythonAnywhere**: Upload → Schedule task  
-**Your Computer**: Run in background with `nohup`
-
-## Files
-
-- `extract_showlayout.py` - Main script
-- `bus_details_curl.txt` - TNSTC API curl command
-- `bus_details.html` - Auto-generated response cache
+├── api/
+│   ├── search.js          # Vercel Serverless Function: fetches TNSTC, parses HTML, applies filters
+│   ├── telegram.js        # Vercel Serverless Function: verifies credentials & sends Telegram alerts
+│   └── cron.js            # Vercel Serverless Function: 24/7 cloud scheduler webhook
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx          # Header, Start/Stop toggle, Countdown timer
+│   │   ├── QuickStats.jsx      # Metrics cards
+│   │   ├── BookingManager.jsx  # cURL paste, route toggling, auto-parser
+│   │   ├── FilterSettings.jsx  # Bus types, time window, seat requirements
+│   │   ├── TelegramConfig.jsx  # Bot token, chat ID, live bot test
+│   │   ├── ResultsTable.jsx    # Matching buses cards & seat badges
+│   │   ├── LiveLogs.jsx        # Terminal console logs
+│   │   └── CloudCronModal.jsx  # 24/7 cloud setup guide
+│   ├── utils/
+│   │   ├── curlParser.js       # Extracts URLs, headers, cookies, dates from bash cURL
+│   │   ├── filterBuses.js      # 5-stage filter matching original logic
+│   │   └── storage.js          # LocalStorage persistence for user config & curls
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── index.html
+├── vite.config.js         # Vite config with local dev server API middleware
+├── vercel.json            # Vercel build & route rules
+├── package.json
+└── README.md
+```

@@ -1,0 +1,25 @@
+name: TNSTC 24/7 Automated Bus Check
+
+on:
+  schedule:
+    # Runs every 10 minutes, 24/7 in the cloud without requiring your computer to be on
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-search:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Bus Check Endpoint
+        env:
+          VERCEL_APP_URL: ${{ secrets.VERCEL_APP_URL }}
+        run: |
+          if [ -z "$VERCEL_APP_URL" ]; then
+            echo "VERCEL_APP_URL secret is not set yet. Please set your deployed Vercel domain in GitHub Repo Settings -> Secrets."
+            exit 0
+          fi
+          echo "Pinging ${VERCEL_APP_URL}/api/cron..."
+          curl -s -X POST "${VERCEL_APP_URL}/api/cron" \
+            -H "Content-Type: application/json" \
+            -d '{"filters":{"minSeats":1}}'
+
